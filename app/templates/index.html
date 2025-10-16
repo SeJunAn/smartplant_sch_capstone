@@ -1,11 +1,25 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>FastAPI Skeleton</title>
+  <meta charset="UTF-8">
+  <title>AI Smart Pot</title>
+  <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <h1>FastAPI Skeleton Project</h1>
-    <p>This is an empty template.</p>
+  <h1>🌱 AI Smart Pot</h1>
+
+  <div class="pot-section">
+    <img src="/static/images/pot_healthy.png" alt="화분 상태" class="pot-img">
+    <p class="status">{{ status }}</p>
+  </div>
+
+  <div class="sensor-cards">
+    <div class="card">🌡️ {{ temperature }} °C</div>
+    <div class="card">💧 {{ moisture }} %</div>
+    <div class="card">☁️ {{ humidity }} %</div>
+    <div class="card">☀️ {{ light }} lux</div>
+  </div>
+
+  <p class="last-water">마지막 급수: {{ last_watered }}</p>
 </body>
 </html>
