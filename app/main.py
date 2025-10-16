@@ -1,19 +1,13 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.routers import example
-
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-# 라우터 등록
-app.include_router(example.router)
-
-# 템플릿 설정
 templates = Jinja2Templates(directory="app/templates")
+
+# 정적 파일 등록
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request):
@@ -26,6 +20,5 @@ async def main_page(request: Request):
         "status": "Healthy"
     }
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request, **sensor_data}
+        "index.html", {"request": request, **sensor_data}
     )
