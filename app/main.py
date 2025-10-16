@@ -7,6 +7,8 @@ from app.routers import example
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 # 라우터 등록
 app.include_router(example.router)
 
