@@ -5,3 +5,5 @@ python-multipart
 requests
 pydantic
 pymysql
+python-dotenv
+sqlalchemy
