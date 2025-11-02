@@ -20,9 +20,6 @@ class SensorDataCreate(BaseModel):
 
 
 class PumpLogCreate(BaseModel):
-    duration_seconds: float = Field(
-        ..., gt=0, description="Pump run duration in seconds"
-    )
     start_time: Optional[datetime] = Field(
         default=None, description="Timestamp when the pump started"
     )

@@ -20,7 +20,6 @@ class PumpLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     start_time = Column(DateTime, default=datetime.utcnow)
-    duration_seconds = Column(Float, nullable=False)
 
 
 # 3️⃣ 식물 건강 상태

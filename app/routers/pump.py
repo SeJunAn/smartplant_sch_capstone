@@ -16,10 +16,7 @@ def create_pump_log(
 ):
     start_time = payload.start_time or datetime.utcnow()
 
-    pump_log = PumpLog(
-        start_time=start_time,
-        duration_seconds=payload.duration_seconds,
-    )
+    pump_log = PumpLog(start_time=start_time)
 
     db.add(pump_log)
     db.commit()
@@ -28,5 +25,4 @@ def create_pump_log(
     return {
         "id": pump_log.id,
         "start_time": pump_log.start_time,
-        "duration_seconds": pump_log.duration_seconds,
     }
