@@ -38,5 +38,14 @@ jobs:
             docker pull ${{ secrets.DOCKER_IMAGE }}:latest
             docker stop fastapi_app || true
             docker rm fastapi_app || true
-            docker run -d --name fastapi_app -p 80:8000 ${{ secrets.DOCKER_IMAGE }}:latest
+            docker run -d \
+              --name fastapi_app \
+              --restart always \
+              -p 80:8000 \
+              -e MYSQL_HOST=${{ secrets.MYSQL_HOST }} \
+              -e MYSQL_PORT=${{ secrets.MYSQL_PORT }} \
+              -e MYSQL_USER=${{ secrets.MYSQL_USER }} \
+              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              -e MYSQL_DB=${{ secrets.MYSQL_DB }} \
+              ${{ secrets.DOCKER_IMAGE }}:latest
             docker ps -a
