@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/pump-log", tags=["pump-log"])
 def create_pump_log(
     payload: PumpLogCreate, db: Session = Depends(get_db)
 ):
-    start_time = payload.start_time or datetime.utcnow()
+    start_time = payload.start_time or datetime.now(timezone.utc)
 
     pump_log = PumpLog(start_time=start_time)
 
