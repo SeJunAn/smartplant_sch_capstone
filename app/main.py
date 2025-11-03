@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -60,6 +61,16 @@ async def main_page(request: Request, db: Session = Depends(get_db)):
             "status": "Waiting for sensor data",
         }
 
+    pump_command_endpoint = os.getenv(
+        "PUMP_COMMAND_ENDPOINT",
+        "https://rabidly-thioacetic-cortez.ngrok-free.dev/pump-command",
+    )
+
     return templates.TemplateResponse(
-        "index.html", {"request": request, **sensor_data}
+        "index.html",
+        {
+            "request": request,
+            **sensor_data,
+            "pump_command_endpoint": pump_command_endpoint,
+        },
     )

@@ -54,7 +54,7 @@
 
   <script>
     const pumpButton = document.getElementById("water-btn");
-    const pumpEndpoint = "/pump-command";
+    const pumpEndpoint = {{ pump_command_endpoint | tojson }};
     const pumpLogEndpoint = "/pump-log/";
     const pumpStatusContainer = document.getElementById("pump-status");
 
