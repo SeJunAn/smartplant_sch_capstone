@@ -1,14 +1,10 @@
 import logging
-import os
+from datetime import datetime, timezone
+from threading import Lock
 from typing import Any, Dict, Optional
 
-import requests
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from pydantic import BaseModel, Field
-
-FLASK_PUMP_URL = os.getenv(
-    "FLASK_PUMP_URL", "http://192.168.223.55:8000/pump-command"
-)
 
 logger = logging.getLogger(__name__)
 
@@ -25,36 +21,60 @@ class PumpCommandPayload(BaseModel):
         extra = "allow"
 
 
+class PumpCommandResponse(BaseModel):
+    water: bool
+    duration_seconds: int = 0
+    issued_at: Optional[str] = None
+
+
+_command_lock: Lock = Lock()
+_latest_command: Dict[str, Any] = {}
+
+
+def _set_command(payload: PumpCommandPayload) -> Dict[str, Any]:
+    with _command_lock:
+        command = {
+            "water": payload.water,
+            "duration_seconds": payload.duration_seconds or 0,
+            "issued_at": datetime.now(timezone.utc).isoformat(),
+        }
+        global _latest_command
+        _latest_command = command
+        return command
+
+
+def _pop_command() -> Dict[str, Any]:
+    with _command_lock:
+        global _latest_command
+        if not _latest_command:
+            return {"water": False, "duration_seconds": 0, "issued_at": None}
+
+        command = _latest_command
+        # Clear after single consumption so repeated polling doesn't retrigger.
+        _latest_command = {}
+        return command
+
+
 @router.post("/pump-command", status_code=status.HTTP_202_ACCEPTED)
-def forward_pump_command(payload: PumpCommandPayload) -> Dict[str, Any]:
-    try:
-        response = requests.post(
-            FLASK_PUMP_URL,
-            json=payload.dict(exclude_none=True),
-            timeout=5,
-        )
-    except requests.RequestException as exc:
-        logger.error("Failed to reach pump backend: %s", exc)
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Failed to reach internal pump controller.",
-        ) from exc
+def create_pump_command(payload: PumpCommandPayload) -> Dict[str, Any]:
+    command = _set_command(payload)
+    logger.info(
+        "Pump command queued",
+        extra={
+            "water": command["water"],
+            "duration_seconds": command["duration_seconds"],
+            "issued_at": command["issued_at"],
+        },
+    )
 
-    if response.status_code >= 400:
-        logger.warning(
-            "Pump backend returned error",
-            extra={
-                "status_code": response.status_code,
-                "response_text": response.text[:200],
-            },
-        )
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Pump controller responded with {response.status_code}",
-        )
-
-    logger.info("Pump command forwarded successfully")
     return {
-        "detail": "Pump command forwarded successfully.",
-        "pump_controller_status": response.status_code,
+        "detail": "Pump command registered.",
+        "command": command,
     }
+
+
+@router.get("/pump-command", response_model=PumpCommandResponse)
+def fetch_pump_command() -> PumpCommandResponse:
+    command = _pop_command()
+    logger.info("Pump command retrieved", extra={"water": command["water"]})
+    return PumpCommandResponse(**command)

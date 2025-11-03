@@ -79,7 +79,7 @@
     async function triggerPump() {
   pumpButton.disabled = true;
   pumpButton.textContent = "⏳ 급수 중...";
-  logPumpStatus("자동 급수 요청을 전송합니다.");
+  logPumpStatus("자동 급수 명령을 등록합니다.");
 
   try {
     const response = await fetch(pumpEndpoint, {
@@ -93,8 +93,17 @@
 
     if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
 
+    const commandResult = await response.json().catch(() => null);
+
     pumpButton.textContent = "✅ 급수 완료";
-    logPumpStatus("클라우드 서버에 급수 요청을 보냈습니다.", "success");
+    if (commandResult?.command) {
+      logPumpStatus(
+        `명령이 등록되었습니다. duration=${commandResult.command.duration_seconds}s`,
+        "success"
+      );
+    } else {
+      logPumpStatus("명령이 등록되었습니다.", "success");
+    }
   } catch (err) {
     console.error(err);
     logPumpStatus("급수 요청 실패: " + err.message, "error");
