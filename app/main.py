@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import Depends, FastAPI, Request
@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
-from app.routers import pump, sensor
+from app.routers import plant_health, pump, sensor
 from app.database import get_db
 from app.models import SensorData
 
@@ -19,6 +19,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(sensor.router)
 app.include_router(pump.router)
+app.include_router(plant_health.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request, db: Session = Depends(get_db)):
@@ -34,7 +35,7 @@ async def main_page(request: Request, db: Session = Depends(get_db)):
     if latest_data:
         moisture = latest_data.soil_moisture
         status = "Needs Water" if (moisture is not None and moisture < 30) else "Healthy"
-        last_watered = latest_data.timestamp or datetime.utcnow()
+        last_watered = latest_data.timestamp or datetime.now(timezone.utc)
         sensor_data = {
             "temperature": _format_value(latest_data.temperature),
             "moisture": _format_value(moisture),
