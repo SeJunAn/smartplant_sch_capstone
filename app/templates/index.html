@@ -77,56 +77,35 @@
     }
 
     async function triggerPump() {
-      pumpButton.disabled = true;
-      pumpButton.textContent = "⏳ 급수 중...";
-      logPumpStatus("자동 급수 요청을 전송합니다.");
+  pumpButton.disabled = true;
+  pumpButton.textContent = "⏳ 급수 중...";
+  logPumpStatus("자동 급수 요청을 전송합니다.");
 
-      try {
-        const response = await fetch(pumpEndpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ triggeredAt: new Date().toISOString() }),
-        });
+  try {
+    const response = await fetch(pumpEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        water: true,
+        duration_seconds: 3   // 원하는 시간 (초)
+      })
+    });
 
-        if (!response.ok) {
-          throw new Error(`Pump server responded with ${response.status}`);
-        }
+    if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
 
-        pumpButton.textContent = "✅ 급수 완료";
-        logPumpStatus("외부 펌프 서버에서 성공 응답을 받았습니다.", "success");
+    pumpButton.textContent = "✅ 급수 완료";
+    logPumpStatus("클라우드 서버에 급수 요청을 보냈습니다.", "success");
+  } catch (err) {
+    console.error(err);
+    logPumpStatus("급수 요청 실패: " + err.message, "error");
+  } finally {
+    setTimeout(() => {
+      pumpButton.disabled = false;
+      pumpButton.textContent = "💧 수동 급수";
+    }, 3000);
+  }
+}
 
-        try {
-          const pumpLogResponse = await fetch(pumpLogEndpoint, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ start_time: new Date().toISOString() }),
-          });
-
-          if (!pumpLogResponse.ok) {
-            throw new Error(`Pump log API responded with ${pumpLogResponse.status}`);
-          }
-
-          logPumpStatus("내부 펌프 로그에 기록했습니다.", "success");
-        } catch (logError) {
-          console.error("Failed to log pump event:", logError);
-          logPumpStatus("펌프 로그 기록에 실패했습니다. 서버 로그를 확인하세요.", "warning");
-        }
-      } catch (error) {
-        console.error("Failed to trigger pump:", error);
-        pumpButton.textContent = "⚠️ 급수 실패";
-        alert("자동 급수 요청에 실패했습니다. 네트워크 상태를 확인해 주세요.");
-        logPumpStatus(`자동 급수 요청 실패: ${error.message}`, "error");
-      } finally {
-        setTimeout(() => {
-          pumpButton.disabled = false;
-          pumpButton.textContent = "💧 수동 급수";
-        }, 3000);
-      }
-    }
 
     pumpButton.addEventListener("click", triggerPump);
   </script>
