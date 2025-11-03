@@ -4,9 +4,12 @@ from typing import Optional
 import requests
 from fastapi import APIRouter, HTTPException, UploadFile, File, status
 
-FORWARD_URL = os.getenv("IMAGE_FORWARD_URL", "https://lowell-nonsuccessful-covetingly.ngrok-free.dev/upload")
+FORWARD_URL = os.getenv(
+    "IMAGE_FORWARD_URL",
+    "https://lowell-nonsuccessful-covetingly.ngrok-free.dev/upload",
+)
 
-router = APIRouter(prefix="/images", tags=["images"])
+router = APIRouter(tags=["images"])
 
 
 def _post_image_to_remote(
@@ -26,10 +29,7 @@ def _post_image_to_remote(
     return requests.post(forward_url, files=files, timeout=timeout)
 
 
-@router.post("/upload", status_code=status.HTTP_202_ACCEPTED)
-async def forward_image(
-    image: UploadFile = File(...),
-):
+async def _forward_single_image(image: UploadFile = File(...)):
     try:
         response = _post_image_to_remote(image, FORWARD_URL, timeout=10)
     except requests.RequestException as exc:
@@ -45,3 +45,17 @@ async def forward_image(
         )
 
     return {"detail": "Image forwarded successfully."}
+
+
+@router.post("/images/upload", status_code=status.HTTP_202_ACCEPTED)
+async def forward_image(image: UploadFile = File(...)):
+    return await _forward_single_image(image)
+
+
+@router.post(
+    "/upload",
+    status_code=status.HTTP_202_ACCEPTED,
+    include_in_schema=False,
+)
+async def forward_image_legacy(image: UploadFile = File(...)):
+    return await _forward_single_image(image)
