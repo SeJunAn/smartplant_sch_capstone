@@ -41,3 +41,20 @@ class PlantHealthCreate(BaseModel):
             raise ValueError("health_status is required when health_level is not 1")
 
         return model
+
+
+class PumpCommandCreate(BaseModel):
+    water: bool = Field(default=True, description="Whether pump should activate")
+    duration_seconds: Optional[int] = Field(
+        default=3, ge=0, description="Duration for pump operation in seconds"
+    )
+
+
+class PumpCommandOut(BaseModel):
+    command_id: Optional[int] = Field(default=None, description="Unique command id")
+    water: bool
+    duration_seconds: int
+    issued_at: Optional[datetime]
+
+    class Config:
+        orm_mode = True

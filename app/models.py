@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, DateTime
+from sqlalchemy import Column, Integer, Float, String, DateTime, Boolean
 from app.database import Base
 from datetime import datetime, timezone
 
@@ -34,3 +34,14 @@ class PlantHealth(Base):
     health_level = Column(Integer, nullable=False)
     health_status = Column(String(100), nullable=False)
     diagnosis_date = Column(DateTime, default=_utcnow)
+
+
+# 4️⃣ 펌프 명령 큐
+class PumpCommand(Base):
+    __tablename__ = "PumpCommand"
+
+    id = Column(Integer, primary_key=True, index=True)
+    water = Column(Boolean, nullable=False, default=True)
+    duration_seconds = Column(Integer, nullable=False, default=0)
+    issued_at = Column(DateTime, nullable=False, default=_utcnow)
+    consumed_at = Column(DateTime, nullable=True)

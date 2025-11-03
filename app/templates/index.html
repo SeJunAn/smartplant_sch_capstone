@@ -81,14 +81,16 @@
   pumpButton.textContent = "⏳ 급수 중...";
   logPumpStatus("자동 급수 명령을 등록합니다.");
 
+  const payload = {
+    water: true,
+    duration_seconds: 3   // 원하는 시간 (초)
+  };
+
   try {
     const response = await fetch(pumpEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        water: true,
-        duration_seconds: 3   // 원하는 시간 (초)
-      })
+      body: JSON.stringify(payload)
     });
 
     if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
@@ -96,14 +98,20 @@
     const commandResult = await response.json().catch(() => null);
 
     pumpButton.textContent = "✅ 급수 완료";
-    if (commandResult?.command) {
-      logPumpStatus(
-        `명령이 등록되었습니다. duration=${commandResult.command.duration_seconds}s`,
-        "success"
-      );
-    } else {
-      logPumpStatus("명령이 등록되었습니다.", "success");
+    const issuedAt = commandResult?.issued_at
+      ? new Date(commandResult.issued_at).toLocaleTimeString()
+      : null;
+    const duration = commandResult?.duration_seconds ?? payload.duration_seconds ?? 0;
+    const commandId = commandResult?.command_id;
+
+    let successMessage = "명령이 등록되었습니다.";
+    if (commandId) {
+      successMessage += ` (ID=${commandId}`;
+      if (duration !== undefined) successMessage += `, duration=${duration}s`;
+      if (issuedAt) successMessage += `, issued=${issuedAt}`;
+      successMessage += ")";
     }
+    logPumpStatus(successMessage, "success");
   } catch (err) {
     console.error(err);
     logPumpStatus("급수 요청 실패: " + err.message, "error");
