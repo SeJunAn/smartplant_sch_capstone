@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from zoneinfo import ZoneInfo
 
-from app.routers import image_proxy, plant_health, pump, sensor
+from app.routers import image_proxy, plant_health, pump, pump_proxy, sensor
 from app.database import get_db
 from app.models import SensorData
 
@@ -22,6 +22,7 @@ app.include_router(sensor.router)
 app.include_router(pump.router)
 app.include_router(plant_health.router)
 app.include_router(image_proxy.router)
+app.include_router(pump_proxy.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request, db: Session = Depends(get_db)):
