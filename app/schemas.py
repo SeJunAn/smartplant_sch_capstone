@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 
 
 class SensorDataCreate(BaseModel):
@@ -35,12 +35,9 @@ class PlantHealthCreate(BaseModel):
         description="Timestamp when the health status was recorded",
     )
 
-    @root_validator
-    def ensure_status_for_severe_cases(cls, values):
-        level = values.get("health_level")
-        status = values.get("health_status")
-
-        if level != 1 and status is None:
+    @model_validator(mode="after")
+    def ensure_status_for_severe_cases(cls, model: "PlantHealthCreate"):
+        if model.health_level != 1 and model.health_status is None:
             raise ValueError("health_status is required when health_level is not 1")
 
-        return values
+        return model
