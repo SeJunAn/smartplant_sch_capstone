@@ -108,3 +108,27 @@ h1 {
   font-size: 15px;
   color: #555;
 }
+
+/* 💧 수동 급수 버튼 */
+.water-btn {
+  background-color: #4caf50;     /* 초록색 버튼 */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.water-btn:hover {
+  background-color: #43a047;    /* hover 시 더 진한 초록색 */
+  transform: translateY(-2px);
+}
+
+.water-btn:active {
+  transform: scale(0.97);
+}
