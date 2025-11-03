@@ -132,3 +132,37 @@ h1 {
 .water-btn:active {
   transform: scale(0.97);
 }
+
+.pump-status {
+  margin: 20px auto 0;
+  max-width: 420px;
+  text-align: left;
+  padding: 0 20px;
+}
+
+.pump-status__entry {
+  margin: 4px 0;
+  font-size: 14px;
+  border-left: 4px solid transparent;
+  padding-left: 8px;
+}
+
+.pump-status__entry--info {
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.pump-status__entry--success {
+  border-color: #2196f3;
+  color: #1565c0;
+}
+
+.pump-status__entry--warning {
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.pump-status__entry--error {
+  border-color: #f44336;
+  color: #c62828;
+}

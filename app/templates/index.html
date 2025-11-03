@@ -49,6 +49,86 @@
   <!-- 마지막 급수 시간 -->
   <p class="last-water">마지막 급수: {{ last_watered }}</p>
   <!-- ✅ 수동 급수 버튼 -->
-  <button id="water-btn" class="water-btn">💧 수동 급수</button>
+  <button id="water-btn" class="water-btn" type="button">💧 수동 급수</button>
+  <div id="pump-status" class="pump-status" aria-live="polite"></div>
+
+  <script>
+    const pumpButton = document.getElementById("water-btn");
+    const pumpEndpoint = "http://192.168.223.55:5000/pump";
+    const pumpLogEndpoint = "/pump-log/";
+    const pumpStatusContainer = document.getElementById("pump-status");
+
+    function logPumpStatus(message, variant = "info") {
+      if (!pumpStatusContainer) {
+        console.log(`[${variant}] ${message}`);
+        return;
+      }
+
+      const entry = document.createElement("p");
+      entry.className = `pump-status__entry pump-status__entry--${variant}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+
+      pumpStatusContainer.prepend(entry);
+
+      const maxEntries = 5;
+      while (pumpStatusContainer.childElementCount > maxEntries) {
+        pumpStatusContainer.removeChild(pumpStatusContainer.lastElementChild);
+      }
+    }
+
+    async function triggerPump() {
+      pumpButton.disabled = true;
+      pumpButton.textContent = "⏳ 급수 중...";
+      logPumpStatus("자동 급수 요청을 전송합니다.");
+
+      try {
+        const response = await fetch(pumpEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ triggeredAt: new Date().toISOString() }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Pump server responded with ${response.status}`);
+        }
+
+        pumpButton.textContent = "✅ 급수 완료";
+        logPumpStatus("외부 펌프 서버에서 성공 응답을 받았습니다.", "success");
+
+        try {
+          const pumpLogResponse = await fetch(pumpLogEndpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ start_time: new Date().toISOString() }),
+          });
+
+          if (!pumpLogResponse.ok) {
+            throw new Error(`Pump log API responded with ${pumpLogResponse.status}`);
+          }
+
+          logPumpStatus("내부 펌프 로그에 기록했습니다.", "success");
+        } catch (logError) {
+          console.error("Failed to log pump event:", logError);
+          logPumpStatus("펌프 로그 기록에 실패했습니다. 서버 로그를 확인하세요.", "warning");
+        }
+      } catch (error) {
+        console.error("Failed to trigger pump:", error);
+        pumpButton.textContent = "⚠️ 급수 실패";
+        alert("자동 급수 요청에 실패했습니다. 네트워크 상태를 확인해 주세요.");
+        logPumpStatus(`자동 급수 요청 실패: ${error.message}`, "error");
+      } finally {
+        setTimeout(() => {
+          pumpButton.disabled = false;
+          pumpButton.textContent = "💧 수동 급수";
+        }, 3000);
+      }
+    }
+
+    pumpButton.addEventListener("click", triggerPump);
+  </script>
 </body>
 </html>

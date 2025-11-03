@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
+from zoneinfo import ZoneInfo
 
 from app.routers import image_proxy, plant_health, pump, sensor
 from app.database import get_db
@@ -36,7 +37,10 @@ async def main_page(request: Request, db: Session = Depends(get_db)):
     if latest_data:
         moisture = latest_data.soil_moisture
         status = "Needs Water" if (moisture is not None and moisture < 30) else "Healthy"
-        last_watered = latest_data.timestamp or datetime.now(timezone.utc)
+        record_time = latest_data.timestamp or datetime.now(timezone.utc)
+        if record_time.tzinfo is None:
+            record_time = record_time.replace(tzinfo=timezone.utc)
+        last_watered = record_time.astimezone(ZoneInfo("Asia/Seoul"))
         sensor_data = {
             "temperature": _format_value(latest_data.temperature),
             "moisture": _format_value(moisture),
