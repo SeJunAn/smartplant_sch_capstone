@@ -4,7 +4,7 @@ from typing import Optional
 import requests
 from fastapi import APIRouter, HTTPException, UploadFile, File, status
 
-FORWARD_URL = os.getenv("IMAGE_FORWARD_URL", "http://100.122.114.19:8000/upload")
+FORWARD_URL = os.getenv("IMAGE_FORWARD_URL", "https://lowell-nonsuccessful-covetingly.ngrok-free.dev/upload")
 
 router = APIRouter(prefix="/images", tags=["images"])
 
