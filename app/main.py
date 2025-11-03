@@ -61,10 +61,9 @@ async def main_page(request: Request, db: Session = Depends(get_db)):
             "status": "Waiting for sensor data",
         }
 
-    pump_command_endpoint = os.getenv(
-        "PUMP_COMMAND_ENDPOINT",
-        "https://rabidly-thioacetic-cortez.ngrok-free.dev/pump-command",
-    )
+    pump_command_endpoint = os.getenv("PUMP_COMMAND_ENDPOINT")
+    if not pump_command_endpoint:
+        pump_command_endpoint = request.app.url_path_for("enqueue_pump_command")
 
     return templates.TemplateResponse(
         "index.html",
