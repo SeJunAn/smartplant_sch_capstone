@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
 FLASK_PUMP_URL = os.getenv(
-    "FLASK_PUMP_URL", "http://192.168.223.55:5000/pump-command"
+    "FLASK_PUMP_URL", "http://192.168.223.55:8000/pump-command"
 )
 
 logger = logging.getLogger(__name__)
