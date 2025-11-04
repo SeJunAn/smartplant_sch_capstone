@@ -49,9 +49,10 @@
   <!-- 마지막 급수 시간 -->
   <p class="last-water">마지막 급수: {{ last_watered }}</p>
   <!-- ✅ 수동 급수 버튼 -->
-  <button id="water-btn" class="water-btn" type="button">💧 수동 급수</button>
+  <!--<button id="water-btn" class="water-btn" type="button">💧 수동 급수</button>
   <div id="pump-status" class="pump-status" aria-live="polite"></div>
-
+-->
+  <!--
   <script>
     const pumpButton = document.getElementById("water-btn");
     const pumpEndpoint = {{ pump_command_endpoint | tojson }};
@@ -77,54 +78,55 @@
     }
 
     async function triggerPump() {
-  pumpButton.disabled = true;
-  pumpButton.textContent = "⏳ 급수 중...";
-  logPumpStatus("자동 급수 명령을 등록합니다.");
+      pumpButton.disabled = true;
+      pumpButton.textContent = "⏳ 급수 중...";
+      logPumpStatus("자동 급수 명령을 등록합니다.");
 
-  const payload = {
-    water: true,
-    duration_seconds: 3   // 원하는 시간 (초)
-  };
+      const payload = {
+        water: true,
+        duration_seconds: 3   // 원하는 시간 (초)
+      };
 
-  try {
-    const response = await fetch(pumpEndpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+      try {
+        const response = await fetch(pumpEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
 
-    if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
+        if (!response.ok) throw new Error(`서버 응답 오류: ${response.status}`);
 
-    const commandResult = await response.json().catch(() => null);
+        const commandResult = await response.json().catch(() => null);
 
-    pumpButton.textContent = "✅ 급수 완료";
-    const issuedAt = commandResult?.issued_at
-      ? new Date(commandResult.issued_at).toLocaleTimeString()
-      : null;
-    const duration = commandResult?.duration_seconds ?? payload.duration_seconds ?? 0;
-    const commandId = commandResult?.command_id;
+        pumpButton.textContent = "✅ 급수 완료";
+        const issuedAt = commandResult?.issued_at
+          ? new Date(commandResult.issued_at).toLocaleTimeString()
+          : null;
+        const duration = commandResult?.duration_seconds ?? payload.duration_seconds ?? 0;
+        const commandId = commandResult?.command_id;
 
-    let successMessage = "명령이 등록되었습니다.";
-    if (commandId) {
-      successMessage += ` (ID=${commandId}`;
-      if (duration !== undefined) successMessage += `, duration=${duration}s`;
-      if (issuedAt) successMessage += `, issued=${issuedAt}`;
-      successMessage += ")";
+        let successMessage = "명령이 등록되었습니다.";
+        if (commandId) {
+          successMessage += ` (ID=${commandId}`;
+          if (duration !== undefined) successMessage += `, duration=${duration}s`;
+          if (issuedAt) successMessage += `, issued=${issuedAt}`;
+          successMessage += ")";
+        }
+        logPumpStatus(successMessage, "success");
+      } catch (err) {
+        console.error(err);
+        logPumpStatus("급수 요청 실패: " + err.message, "error");
+      } finally {
+        setTimeout(() => {
+          pumpButton.disabled = false;
+          pumpButton.textContent = "💧 수동 급수";
+        }, 3000);
+      }
     }
-    logPumpStatus(successMessage, "success");
-  } catch (err) {
-    console.error(err);
-    logPumpStatus("급수 요청 실패: " + err.message, "error");
-  } finally {
-    setTimeout(() => {
-      pumpButton.disabled = false;
-      pumpButton.textContent = "💧 수동 급수";
-    }, 3000);
-  }
-}
 
 
     pumpButton.addEventListener("click", triggerPump);
   </script>
+  -->
 </body>
 </html>
